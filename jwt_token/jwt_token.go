@@ -12,9 +12,9 @@ import (
 const TIMELIMIT = time.Minute * 60
 var jwtSecret string
 
-type VerifyResult struct {
-	UserId   string
+type UserPayload struct {
 	Nickname string
+	UserId string
 }
 
 func init() {
@@ -25,11 +25,11 @@ func init() {
 	jwtSecret = os.Getenv("JWT_SECRET")
 }
 
-func GenerateToken(userId string, nickname string) (string, error) {
+func GenerateToken(user *UserPayload) (string, error) {
 	payload := &jwt.MapClaims{
 		"data": map[string]string{
-			"nickname": nickname,
-			"user_id":  userId,
+			"nickname": user.Nickname,
+			"user_id":  user.UserId,
 		},
 		"iss": "The Rich.io or https://www.therich.io/",
 		"exp": time.Now().Add(TIMELIMIT).Unix(),
@@ -47,8 +47,8 @@ func Encode(payload *jwt.MapClaims) (string, error) {
 	return token, nil
 }
 
-func Decode(tokenString string) (*jwt.Token, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func Decode(tokenString *string) (*jwt.Token, error) {
+	token, err := jwt.Parse(*tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
@@ -68,7 +68,7 @@ func GetUserNickname(decodedData jwt.MapClaims) string {
 	return decodedData["nickname"].(string)
 }
 
-func Verify(tokenString string) (string, error) {
+func Verify(tokenString *string) (string, error) {
 	token, err := Decode(tokenString)
 	if err != nil {
 		return "", err
