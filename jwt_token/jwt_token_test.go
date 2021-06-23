@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-const USERID = "1"
+const USERID = 1
 const NICKNAME = "MAX"
 
 func TestEncode(t *testing.T) {
 	user := UserPayload{UserId: USERID, Nickname: NICKNAME}
 	payload := &jwt.MapClaims{
-		"data": map[string]string{
+		"data": map[string]interface{}{
 			"nickname": user.Nickname,
 			"user_id":  user.UserId,
 		},
@@ -61,10 +61,42 @@ func TestVerify(t *testing.T) {
 }
 
 func TestGetUserId(t *testing.T) {
-	//user := UserPayload{UserId: USERID, Nickname: NICKNAME}
-	//token, err := GenerateToken(&user)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//verifyResult, err := Verify(&token)
+	user := UserPayload{UserId: USERID, Nickname: NICKNAME}
+	tokenString, err := GenerateToken(&user)
+	if err != nil {
+		t.Error("Failed to generate token")
+	}
+	decodedToken, err := Decode(&tokenString)
+	if err != nil {
+		fmt.Println(err)
+	}
+	claims, ok := decodedToken.Claims.(jwt.MapClaims)
+	if ok && decodedToken.Valid {
+		decodedData := claims["data"].(map[string]interface{})
+		userId := GetUserId(decodedData)
+		assert.Equal(t, userId, USERID)
+	} else {
+		t.Error("Not a valid Token")
+	}
+}
+
+func TestGetUserNickname(t *testing.T) {
+	user := UserPayload{UserId: USERID, Nickname: NICKNAME}
+	tokenString, err := GenerateToken(&user)
+	if err != nil {
+		fmt.Println(err)
+	}
+	decodedToken, err := Decode(&tokenString)
+	if err != nil {
+		fmt.Println(err)
+	}
+	claims, ok := decodedToken.Claims.(jwt.MapClaims)
+	if ok && decodedToken.Valid {
+		decodedData := claims["data"].(map[string]interface{})
+		nickname := GetUserNickname(decodedData)
+		assert.NotNil(t, nickname)
+		assert.Equal(t, nickname, NICKNAME)
+	} else {
+		t.Error("Not a valid Token")
+	}
 }
