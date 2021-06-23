@@ -14,7 +14,7 @@ var jwtSecret string
 
 type UserPayload struct {
 	Nickname string
-	UserId float64
+	UserId int
 }
 
 func init() {
@@ -60,15 +60,15 @@ func Decode(tokenString *string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func GetUserId(decodedData map[string]interface{}) float64 {
-	return decodedData["user_id"].(float64)
+func GetUserId(decodedData map[string]interface{}) int {
+	return int(decodedData["user_id"].(float64))
 }
 
 func GetUserNickname(decodedData map[string]interface{}) string {
 	return decodedData["nickname"].(string)
 }
 
-func Verify(tokenString *string) (float64, error) {
+func Verify(tokenString *string) (int, error) {
 	token, err := Decode(tokenString)
 	if err != nil {
 		return 0, err
