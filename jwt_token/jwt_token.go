@@ -14,7 +14,7 @@ var jwtSecret string
 
 type UserPayload struct {
 	Nickname string
-	UserId string
+	UserId float64
 }
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 
 func GenerateToken(user *UserPayload) (string, error) {
 	payload := &jwt.MapClaims{
-		"data": map[string]string{
+		"data": map[string]interface{} {
 			"nickname": user.Nickname,
 			"user_id":  user.UserId,
 		},
@@ -60,18 +60,18 @@ func Decode(tokenString *string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func GetUserId(decodedData jwt.MapClaims) string {
-	return decodedData["user_id"].(string)
+func GetUserId(decodedData map[string]interface{}) float64 {
+	return decodedData["user_id"].(float64)
 }
 
-func GetUserNickname(decodedData jwt.MapClaims) string {
+func GetUserNickname(decodedData map[string]interface{}) string {
 	return decodedData["nickname"].(string)
 }
 
-func Verify(tokenString *string) (string, error) {
+func Verify(tokenString *string) (float64, error) {
 	token, err := Decode(tokenString)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
@@ -80,5 +80,5 @@ func Verify(tokenString *string) (string, error) {
 
 		return userId, nil
 	}
-	return "", err
+	return 0, err
 }
