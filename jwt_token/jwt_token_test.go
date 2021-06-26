@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 	"time"
 )
@@ -18,7 +19,7 @@ func TestEncode(t *testing.T) {
 			"nickname": user.Nickname,
 			"user_id":  user.UserId,
 		},
-		"iss": "The Rich.io or https://www.therich.io/",
+		"iss": os.Getenv("JWT_ISS"),
 		"exp": time.Now().Add(TIMELIMIT).Unix(),
 		"iat": time.Now().Unix(),
 	}
